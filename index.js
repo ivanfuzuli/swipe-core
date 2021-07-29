@@ -1,0 +1,64 @@
+require("dotenv").config();
+
+const express = require("express");
+const passport = require("passport");
+const mongoose = require("mongoose");
+const User = require("./schema/User");
+
+const app = express();
+const LoginStrategy = require("./passport/LoginStrategy");
+const SignupStrategy = require("./passport/SignupStrategy");
+
+const LoginRoute = require("./routes/LoginRoute");
+const ProfileRoute = require("./routes/ProfileRoute");
+const RegisterRoute = require("./routes/RegisterRoute");
+
+const DB = process.env.DB;
+const PORT = process.env.PORT;
+
+mongoose.connect(DB, { useNewUrlParser: true, useUnifiedTopology: true });
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+const JwtStrategy = require("passport-jwt").Strategy,
+  ExtractJwt = require("passport-jwt").ExtractJwt;
+
+const opts = {};
+opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
+opts.secretOrKey = process.env.JWT_SECRET;
+
+passport.use(
+  new JwtStrategy(opts, function (jwt_payload, done) {
+    User.findOne({ _id: jwt_payload.user._id }, function (err, user) {
+      if (err) {
+        return done(err, false);
+      }
+      if (user) {
+        return done(null, user);
+      } else {
+        return done(null, false);
+        // or you could create a new account
+      }
+    });
+  })
+);
+
+passport.use("signup", SignupStrategy);
+passport.use("login", LoginStrategy);
+
+app.get("/", (req, res) => {
+  res.send("Hello World!");
+});
+
+app.use(LoginRoute);
+app.use(RegisterRoute);
+app.use(ProfileRoute);
+app.use(RegisterRoute);
+
+app.use(function (err, req, res, next) {
+  res.status(err.status).send(err);
+});
+app.listen(PORT, () => {
+  console.log(`Example app listening at http://localhost:${PORT}`);
+});
