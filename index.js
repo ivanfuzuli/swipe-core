@@ -7,11 +7,11 @@ const User = require("./models/User");
 
 const app = express();
 const LoginStrategy = require("./passport/LoginStrategy");
-const SignupStrategy = require("./passport/SignupStrategy");
 
 const LoginRoute = require("./routes/LoginRoute");
 const ProfileRoute = require("./routes/ProfileRoute");
 const RegisterRoute = require("./routes/RegisterRoute");
+const ForgotRoute = require("./routes/ForgotRoute");
 
 const DB = process.env.DB;
 const PORT = process.env.PORT;
@@ -44,7 +44,6 @@ passport.use(
   })
 );
 
-passport.use("signup", SignupStrategy);
 passport.use("login", LoginStrategy);
 
 app.get("/", (req, res) => {
@@ -54,7 +53,7 @@ app.get("/", (req, res) => {
 app.use(LoginRoute);
 app.use(RegisterRoute);
 app.use(ProfileRoute);
-app.use(RegisterRoute);
+app.use(ForgotRoute);
 
 app.use(function (err, req, res, next) {
   res.status(err.status).send(err);
