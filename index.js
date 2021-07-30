@@ -17,9 +17,11 @@ const DB = process.env.DB;
 const PORT = process.env.PORT;
 
 mongoose.connect(DB, { useNewUrlParser: true, useUnifiedTopology: true });
+app.set("view engine", "pug");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static("public"));
 
 const JwtStrategy = require("passport-jwt").Strategy,
   ExtractJwt = require("passport-jwt").ExtractJwt;
@@ -53,7 +55,7 @@ app.get("/", (req, res) => {
 app.use(LoginRoute);
 app.use(RegisterRoute);
 app.use(ProfileRoute);
-app.use(ForgotRoute);
+app.use("/forgot", ForgotRoute);
 
 app.use(function (err, req, res, next) {
   res.status(err.status).send(err);
