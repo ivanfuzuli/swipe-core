@@ -1,5 +1,5 @@
 const LocalStrategy = require("passport-local").Strategy;
-const User = require("../schema/User");
+const User = require("../models/User");
 
 const LoginStrategy = new LocalStrategy(
   {
@@ -11,16 +11,16 @@ const LoginStrategy = new LocalStrategy(
       const user = await User.findOne({ email });
 
       if (!user) {
-        return done(null, false, { message: "User not found" });
+        return done(null, false, { message: "user_not_found" });
       }
 
       const validate = await user.isValidPassword(password);
 
       if (!validate) {
-        return done(null, false, { message: "Wrong Password" });
+        return done(null, false, { message: "wrong_password" });
       }
 
-      return done(null, user, { message: "Logged in Successfully" });
+      return done(null, user, { message: "success" });
     } catch (error) {
       return done(error);
     }

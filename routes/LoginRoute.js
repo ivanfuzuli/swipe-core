@@ -18,8 +18,8 @@ const LoginRouter = router.post("/login", async (req, res, next) => {
           return next(error);
         }
 
-        const body = { _id: user._id, email: user.email };
-        const token = jwt.sign({ user: body }, process.env.JWT_SECRET);
+        const body = { sub: user._id, email: user.email };
+        const token = jwt.sign(body, process.env.JWT_SECRET);
 
         return res.json({ token });
       });

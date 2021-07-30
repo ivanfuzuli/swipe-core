@@ -3,7 +3,7 @@ require("dotenv").config();
 const express = require("express");
 const passport = require("passport");
 const mongoose = require("mongoose");
-const User = require("./schema/User");
+const User = require("./models/User");
 
 const app = express();
 const LoginStrategy = require("./passport/LoginStrategy");
