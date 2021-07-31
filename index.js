@@ -1,4 +1,6 @@
 require("dotenv").config();
+const DB = process.env.DB;
+const PORT = process.env.PORT;
 
 const express = require("express");
 const passport = require("passport");
@@ -12,9 +14,6 @@ const LoginRoute = require("./routes/LoginRoute");
 const ProfileRoute = require("./routes/ProfileRoute");
 const RegisterRoute = require("./routes/RegisterRoute");
 const ForgotRoute = require("./routes/ForgotRoute");
-
-const DB = process.env.DB;
-const PORT = process.env.PORT;
 
 mongoose.connect(DB, { useNewUrlParser: true, useUnifiedTopology: true });
 app.set("view engine", "pug");
@@ -32,7 +31,7 @@ opts.secretOrKey = process.env.JWT_SECRET;
 
 passport.use(
   new JwtStrategy(opts, function (jwt_payload, done) {
-    User.findOne({ _id: jwt_payload.user._id }, function (err, user) {
+    User.findOne({ _id: jwt_payload.sub }, function (err, user) {
       if (err) {
         return done(err, false);
       }
