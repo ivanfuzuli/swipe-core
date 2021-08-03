@@ -27,11 +27,15 @@ const RegisterRoute = router.post("/register", async function (req, res, next) {
     return next(createError(403, "username_exists"));
   }
 
-  const newUser = new User({ email, password, username });
-  await newUser.save(); // Generate JWT token
-  const body = { sub: newUser._id, email: newUser.email };
-  const token = jwt.sign(body, process.env.JWT_SECRET);
-  res.status(201).json({ token });
+  try {
+    const newUser = new User({ email, password, username });
+    await newUser.save(); // Generate JWT token
+    const body = { sub: newUser._id, email: newUser.email };
+    const token = jwt.sign(body, process.env.JWT_SECRET);
+    res.status(201).json({ token });
+  } catch {
+    return next(createError(403, "cannot_register"));
+  }
 });
 
 module.exports = RegisterRoute;
