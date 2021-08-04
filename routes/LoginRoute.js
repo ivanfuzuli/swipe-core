@@ -9,7 +9,7 @@ const LoginRouter = router.post("/login", async (req, res, next) => {
   passport.authenticate("login", async (err, user, info) => {
     try {
       if (err || !user) {
-        const error = createError(403, "invalid_user");
+        const error = createError(403, "E-mail or password is not valid.");
         return next(error);
       }
 

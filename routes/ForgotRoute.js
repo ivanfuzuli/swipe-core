@@ -99,7 +99,6 @@ router.post("/verify/:token", async function (req, res) {
   } catch (e) {
     decoded = false;
   }
-  console.log(result);
 
   let message;
   let blockmessage;
