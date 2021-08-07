@@ -55,7 +55,7 @@ app.get("/", (req, res) => {
 
 app.use(LoginRoute);
 app.use(RegisterRoute);
-app.use(ProfileRoute);
+app.use("/profile", ProfileRoute);
 app.use("/forgot", ForgotRoute);
 app.use(VoteRoute);
 app.use(QuoteRoute);
