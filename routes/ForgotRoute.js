@@ -22,7 +22,7 @@ const sendMail = async (email, apiUrl) => {
 
   const body = { sub: foundUser._id, email: foundUser.email };
   const token = jwt.sign(body, process.env.JWT_SECRET, {
-    expiresIn: "6h",
+    expiresIn: "15m",
   });
 
   const link = apiUrl + "/forgot/verify/" + token;
@@ -103,7 +103,7 @@ router.post("/verify/:token", async function (req, res) {
   let message;
   let blockmessage;
   if (!decoded) {
-    blockmessage = "Token is expired!";
+    blockmessage = "Token is expired! It expires in 15 min.";
   }
 
   if (!password) {
