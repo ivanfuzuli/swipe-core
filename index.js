@@ -18,6 +18,10 @@ const VoteRoute = require("./routes/VoteRoute");
 const QuoteRoute = require("./routes/QuoteRoute");
 const AuthRoute = require("./routes/AuthRoute");
 
+mongoose.set("useNewUrlParser", true);
+mongoose.set("useFindAndModify", false);
+mongoose.set("useCreateIndex", true);
+
 mongoose.connect(DB, { useNewUrlParser: true, useUnifiedTopology: true });
 app.set("view engine", "pug");
 
@@ -66,6 +70,7 @@ app.use(QuoteRoute);
 app.use(function (err, req, res, next) {
   res.status(err.status).send(err);
 });
+
 app.listen(PORT, () => {
   console.log(`Example app listening at http://localhost:${PORT}`);
 });
