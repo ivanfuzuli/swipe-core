@@ -16,6 +16,7 @@ const RegisterRoute = require("./routes/RegisterRoute");
 const ForgotRoute = require("./routes/ForgotRoute");
 const VoteRoute = require("./routes/VoteRoute");
 const QuoteRoute = require("./routes/QuoteRoute");
+const AuthRoute = require("./routes/AuthRoute");
 
 mongoose.connect(DB, { useNewUrlParser: true, useUnifiedTopology: true });
 app.set("view engine", "pug");
@@ -57,6 +58,8 @@ app.use(LoginRoute);
 app.use(RegisterRoute);
 app.use("/profile", ProfileRoute);
 app.use("/forgot", ForgotRoute);
+app.use("/auth", AuthRoute);
+
 app.use(VoteRoute);
 app.use(QuoteRoute);
 
