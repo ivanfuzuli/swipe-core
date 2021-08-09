@@ -18,10 +18,11 @@ const LoginRouter = router.post("/login", async (req, res, next) => {
           return next(error);
         }
 
+        const hasTags = user.tags.length > 0;
         const body = { sub: user._id, email: user.email };
         const token = jwt.sign(body, process.env.JWT_SECRET);
 
-        return res.json({ token });
+        return res.json({ token, hasTags });
       });
     } catch (error) {
       return next(error);

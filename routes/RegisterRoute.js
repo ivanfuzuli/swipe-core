@@ -32,7 +32,7 @@ const RegisterRoute = router.post("/register", async function (req, res, next) {
     await newUser.save(); // Generate JWT token
     const body = { sub: newUser._id, email: newUser.email };
     const token = jwt.sign(body, process.env.JWT_SECRET);
-    res.status(201).json({ token });
+    res.status(201).json({ token, hasTags: false });
   } catch {
     return next(
       createError(
