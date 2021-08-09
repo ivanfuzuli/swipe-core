@@ -141,7 +141,6 @@ router.put(
   async function (req, res, next) {
     const { tags } = req.body;
     const { _id } = req.user;
-    console.log("sub", _id, tags);
 
     if (!tags || tags.length < 1) {
       return next(createError(406, "There should be at least one tag!"));
