@@ -45,7 +45,7 @@ router.put(
         }
       );
     } catch {
-      return next(createError(406, "E-mail couldn't saved!"));
+      return next(createError(406, "E-mail couldn't saved! DB error."));
     }
 
     res.send({
@@ -127,6 +127,37 @@ router.put(
       await user.save();
     } catch {
       return next(createError(406, "Password couldn't saved!"));
+    }
+
+    res.send({
+      success: true,
+    });
+  }
+);
+
+router.put(
+  "/tags",
+  passport.authenticate("jwt", { session: false }),
+  async function (req, res, next) {
+    const { tags } = req.body;
+    const { _id } = req.user;
+    console.log("sub", _id, tags);
+
+    if (!tags || tags.length < 1) {
+      return next(createError(406, "There should be at least one tag!"));
+    }
+
+    try {
+      await User.updateOne(
+        { _id },
+        {
+          $set: {
+            tags,
+          },
+        }
+      );
+    } catch (err) {
+      return next(createError(406, "Unexpected db error!"));
     }
 
     res.send({

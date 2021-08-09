@@ -20,6 +20,7 @@ const UserSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    tags: [],
     created_at: Number,
     updated_at: Number,
   },
