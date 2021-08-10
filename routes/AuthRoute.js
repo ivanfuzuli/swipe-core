@@ -27,11 +27,11 @@ const getMe = async (token) => {
   return data;
 };
 
-const signAndRedirect = (res, state, id, email) => {
+const signAndRedirect = (res, state, id, email, hasTags) => {
   const body = { sub: id, email: email };
   const token = jwt.sign(body, process.env.JWT_SECRET);
 
-  const redirectUrl = `exp://auth?state=${state}&token=${token}&where=expo-auth-session`;
+  const redirectUrl = `exp://auth?state=${state}&token=${token}&hasTags=${hasTags}&where=expo-auth-session`;
   return res.redirect(302, redirectUrl);
 };
 
@@ -42,7 +42,7 @@ const register = async (res, state, fb_id, email) => {
   const newUser = new User({ fb_id, email, password, username });
   const { _id } = await newUser.save();
 
-  return signAndRedirect(res, state, _id, email);
+  return signAndRedirect(res, state, _id, email, 0);
 };
 
 router.get("/facebook", async function (req, res, next) {
@@ -53,7 +53,14 @@ router.get("/facebook", async function (req, res, next) {
 
     let foundFacebook = await User.findOne({ fb_id: id });
     if (foundFacebook) {
-      return signAndRedirect(res, state, foundFacebook.id, email);
+      const exists = foundFacebook.tags.length > 0;
+
+      let hasTags = 0;
+      if (exists) {
+        hasTags = 1;
+      }
+
+      return signAndRedirect(res, state, foundFacebook.id, email, hasTags);
     }
 
     // register
