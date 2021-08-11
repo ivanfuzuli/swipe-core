@@ -8,11 +8,7 @@ const { nanoid } = require("nanoid");
 const User = require("../models/User");
 
 const getTokenByFacebook = async (req, code) => {
-  const apiUrl = url.format({
-    protocol: req.protocol,
-    host: req.get("host"),
-  });
-  const orgRedirectUri = apiUrl + "/auth/facebook";
+  const orgRedirectUri = process.env.API_URL + "/auth/facebook";
   const reqUrl = `https://graph.facebook.com/v11.0/oauth/access_token?client_id=${process.env.FB_APP_ID}&redirect_uri=${orgRedirectUri}&client_secret=${process.env.FB_SECRET}&code=${code}`;
   const { data } = await axios.get(reqUrl);
 
@@ -39,7 +35,6 @@ const getMeByGoogle = async (token) => {
 };
 
 const getTokenByGoogle = async (req, code) => {
-  console.log("req", req.protocol);
   const orgRedirectUri = process.env.API_URL + "/auth/google";
   const reqUrl = `https://oauth2.googleapis.com/token`;
   const payload = {
