@@ -39,7 +39,7 @@ const getMeByGoogle = async (token) => {
 };
 
 const getTokenByGoogle = async (req, code) => {
-  console.log("req", req);
+  console.log("req", req.protocol);
   const apiUrl = url.format({
     protocol: req.protocol,
     host: req.get("host"),
