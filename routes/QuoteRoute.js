@@ -52,6 +52,13 @@ const QuoteRoute = router.get(
       {
         $match: { votes: { $size: 0 } },
       },
+      {
+        $project: {
+          quote: 1,
+          title: 1,
+          author: 1,
+        },
+      },
       { $limit: 15 },
     ]);
 
