@@ -7,7 +7,7 @@ const { nanoid } = require("nanoid");
 
 const User = require("../models/User");
 
-const getToken = async (req, code) => {
+const getTokenByFacebook = async (req, code) => {
   const apiUrl = url.format({
     protocol: req.protocol,
     host: req.get("host"),
@@ -19,12 +19,44 @@ const getToken = async (req, code) => {
   return data.access_token;
 };
 
-const getMe = async (token) => {
+const getMeByFacebook = async (token) => {
   const { data } = await axios.get(
     "https://graph.facebook.com/me?fields=email,name&access_token=" + token
   );
 
   return data;
+};
+
+const getMeByGoogle = async (token) => {
+  const { data } = await axios.get(
+    `https://www.googleapis.com/oauth2/v3/userinfo?access_token=${token}`
+  );
+
+  return {
+    id: data.sub,
+    email: data.email,
+  };
+};
+
+const getTokenByGoogle = async (req, code) => {
+  const apiUrl = url.format({
+    protocol: req.protocol,
+    host: req.get("host"),
+  });
+
+  const orgRedirectUri = apiUrl + "/auth/google";
+  const reqUrl = `https://oauth2.googleapis.com/token`;
+  const payload = {
+    code,
+    client_id: process.env.GOOGLE_APP_ID,
+    client_secret: process.env.GOOGLE_SECRET,
+    redirect_uri: orgRedirectUri,
+    grant_type: "authorization_code",
+  };
+
+  const { data } = await axios.post(reqUrl, payload);
+
+  return data.access_token;
 };
 
 const signAndRedirect = (res, state, id, email, hasTags) => {
@@ -35,11 +67,11 @@ const signAndRedirect = (res, state, id, email, hasTags) => {
   return res.redirect(302, redirectUrl);
 };
 
-const register = async (res, state, fb_id, email) => {
+const register = async (res, prefix, idField, state, id, email) => {
   const password = nanoid();
-  const username = "fb_" + nanoid().substring(0, 8);
+  const username = prefix + nanoid().substring(0, 8);
 
-  const newUser = new User({ fb_id, email, password, username });
+  const newUser = new User({ [idField]: id, email, password, username });
   const { _id } = await newUser.save();
 
   return signAndRedirect(res, state, _id, email, 0);
@@ -49,7 +81,9 @@ router.get("/facebook", async function (req, res, next) {
   try {
     const { state, code } = req.query;
 
-    let { id, email } = await getMe(await getToken(req, code));
+    let { id, email } = await getMeByFacebook(
+      await getTokenByFacebook(req, code)
+    );
 
     let foundFacebook = await User.findOne({ fb_id: id });
     if (foundFacebook) {
@@ -60,7 +94,13 @@ router.get("/facebook", async function (req, res, next) {
         hasTags = 1;
       }
 
-      return signAndRedirect(res, state, foundFacebook.id, email, hasTags);
+      return signAndRedirect(
+        res,
+        state,
+        foundFacebook._id,
+        foundFacebook.email,
+        hasTags
+      );
     }
 
     // register
@@ -73,10 +113,10 @@ router.get("/facebook", async function (req, res, next) {
           "Your email is already in our database. You can sign-in with your e-mail and password.";
         return res.render("errorMessage", { title: "Error!", message });
       }
-      return register(res, state, id, email);
+      return register(res, "fb_", "fb_id", state, id, email);
     } else {
       email = "fb_" + nanoid().substring(0, 8) + "@swipewiseapp.com";
-      return register(res, state, id, email);
+      return register(res, "fb_", "fb_id", state, id, email);
     }
   } catch (err) {
     console.log(err);
@@ -85,4 +125,48 @@ router.get("/facebook", async function (req, res, next) {
   }
 });
 
+router.get("/google", async function (req, res, next) {
+  try {
+    const { state, code } = req.query;
+    let { id, email } = await getMeByGoogle(await getTokenByGoogle(req, code));
+
+    let foundGoogle = await User.findOne({ go_id: id });
+    if (foundGoogle) {
+      const exists = foundGoogle.tags.length > 0;
+
+      let hasTags = 0;
+      if (exists) {
+        hasTags = 1;
+      }
+
+      return signAndRedirect(
+        res,
+        state,
+        foundGoogle._id,
+        foundGoogle.email,
+        hasTags
+      );
+    }
+
+    // register
+
+    if (email) {
+      // facebook provides email
+      let foundEmail = await User.findOne({ email });
+      if (foundEmail) {
+        const message =
+          "Your email is already in our database. You can sign-in with your e-mail and password.";
+        return res.render("errorMessage", { title: "Error!", message });
+      }
+      return register(res, "go_", "go_id", state, id, email);
+    } else {
+      email = "go_" + nanoid().substring(0, 8) + "@swipewiseapp.com";
+      return register(res, "go_", "go_id", state, id, email);
+    }
+  } catch (err) {
+    console.log(err);
+    const message = "An unexpected error occured! Please, try again later.";
+    res.render("errorMessage", { title: "Error!", message });
+  }
+});
 module.exports = router;
