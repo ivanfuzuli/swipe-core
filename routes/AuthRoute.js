@@ -44,7 +44,7 @@ const getTokenByGoogle = async (req, code) => {
     protocol: req.protocol,
     host: req.get("host"),
   });
-
+  console.log("apiUrl", apiUrl);
   const orgRedirectUri = apiUrl + "/auth/google";
   const reqUrl = `https://oauth2.googleapis.com/token`;
   const payload = {
