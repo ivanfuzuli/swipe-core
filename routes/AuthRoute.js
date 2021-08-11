@@ -40,12 +40,7 @@ const getMeByGoogle = async (token) => {
 
 const getTokenByGoogle = async (req, code) => {
   console.log("req", req.protocol);
-  const apiUrl = url.format({
-    protocol: req.protocol,
-    host: req.get("host"),
-  });
-  console.log("apiUrl", apiUrl);
-  const orgRedirectUri = apiUrl + "/auth/google";
+  const orgRedirectUri = process.env.API_URL + "/auth/google";
   const reqUrl = `https://oauth2.googleapis.com/token`;
   const payload = {
     code,
