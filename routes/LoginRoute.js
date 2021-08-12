@@ -9,7 +9,7 @@ const LoginRouter = router.post("/login", async (req, res, next) => {
   passport.authenticate("login", async (err, user, info) => {
     try {
       if (err || !user) {
-        const error = createError(403, "invalid_user");
+        const error = createError(403, "E-mail or password is not valid.");
         return next(error);
       }
 
@@ -18,10 +18,11 @@ const LoginRouter = router.post("/login", async (req, res, next) => {
           return next(error);
         }
 
-        const body = { _id: user._id, email: user.email };
-        const token = jwt.sign({ user: body }, process.env.JWT_SECRET);
+        const hasTags = user.tags.length > 0;
+        const body = { sub: user._id, email: user.email };
+        const token = jwt.sign(body, process.env.JWT_SECRET);
 
-        return res.json({ token });
+        return res.json({ token, hasTags });
       });
     } catch (error) {
       return next(error);

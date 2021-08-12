@@ -2,6 +2,14 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const UserSchema = new mongoose.Schema(
   {
+    fb_id: {
+      type: Number,
+      required: false,
+    },
+    go_id: {
+      type: Number,
+      required: false,
+    },
     email: {
       type: String,
       required: true,
@@ -16,6 +24,7 @@ const UserSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    tags: [],
     created_at: Number,
     updated_at: Number,
   },

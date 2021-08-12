@@ -1,0 +1,23 @@
+html
+  head
+    title= title
+    link(rel='stylesheet', href='css/bootstrap/bootstrap.min.css')
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+  body(style='background-color: #f1f1f1')
+    div(style='min-height: 100vh' 
+        class='d-flex text-center p-1 flex-column flex-1 justify-content-center align-items-center')
+      h1(style="color: coral") Swipewise
+      if message === "success"
+        div(class="alert alert-success" role="alert")
+          span Your password reset e-mail successfully sent.
+      else
+        form(method="post" action="")
+          if message
+            div(class="alert alert-danger" role="alert")
+              = message
+          div(class="form-group")
+            label(for="exampleInputEmail1") Send verification e-mail to below address 
+            div(class="small")  (please check Junk folder)
+            div(class="small") (It expires in 15 min!)
+            input(type="email" name="email" class="form-control mt-2 mb-2" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email")
+          button(type="submit" class="btn btn-primary") Send

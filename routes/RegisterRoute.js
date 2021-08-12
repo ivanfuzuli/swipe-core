@@ -1,36 +1,46 @@
 const express = require("express"),
   router = express.Router();
-const User = require("../schema/User");
+const User = require("../models/User");
 const jwt = require("jsonwebtoken");
+const createError = require("http-errors");
 
 const RegisterRoute = router.post("/register", async function (req, res, next) {
   const { email, password, username } = req.body;
   if (!email) {
-    return res.status(403).json({ error: "email_required" });
+    return next(createError(403, "E-mail is required!"));
   }
   if (!username) {
-    return res.status(403).json({ error: "username_required" });
+    return next(createError(403, "Username is required!"));
   }
   if (!password) {
-    return res.status(403).json({ error: "password_required" });
+    return next(createError(403, "Password is required!"));
   }
 
   //Check If User Exists
   let foundUser = await User.findOne({ email });
   if (foundUser) {
-    return res.status(403).json({ error: "Email is already in use" });
+    return next(createError(403, "E-mail already exists."));
   }
 
   let foundUsername = await User.findOne({ username });
   if (foundUsername) {
-    return res.status(403).json({ error: "Username is already in use" });
+    return next(createError(403, "Username already exists."));
   }
 
-  const newUser = new User({ email, password, username });
-  await newUser.save(); // Generate JWT token
-  const body = { sub: newUser._id, email: newUser.email };
-  const token = jwt.sign({ user: body }, process.env.JWT_SECRET);
-  res.status(201).json({ token });
+  try {
+    const newUser = new User({ email, password, username });
+    await newUser.save(); // Generate JWT token
+    const body = { sub: newUser._id, email: newUser.email };
+    const token = jwt.sign(body, process.env.JWT_SECRET);
+    res.status(201).json({ token, hasTags: false });
+  } catch {
+    return next(
+      createError(
+        403,
+        "We cannot register your account. Please try again later."
+      )
+    );
+  }
 });
 
 module.exports = RegisterRoute;

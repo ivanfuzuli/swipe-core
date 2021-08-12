@@ -1,0 +1,30 @@
+html
+  head
+    title= title
+    link(rel='stylesheet', href='../../css/bootstrap/bootstrap.min.css')
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+
+  body(style='background-color: #f1f1f1')
+    div(style='min-height: 100vh' 
+        class='d-flex text-center p-1 flex-column flex-1 justify-content-center align-items-center')
+      h1(style="color: coral") Swipewise
+      if message === "success"
+        div(class="alert alert-success" role="alert")
+          span Your password successfully changed!
+      else
+        form(method="post" action="")
+          if blockmessage
+            div(class="alert alert-danger" role="alert")
+              = blockmessage
+          else
+            if message
+              div(class="alert alert-danger" role="alert")
+                = message
+
+            div(class="form-group")
+              label(for="newpassword") New Password 
+              input(type="password" name="password" class="form-control mt-2 mb-2" id="newpassword" aria-describedby="emailHelp" placeholder="New Password")
+              label(for="passwordValidate") Validate Password
+              input(type="password" name="repassword" class="form-control mt-2 mb-2" id="passwordValidate" aria-describedby="emailHelp" placeholder="Confirm Password")
+
+            button(type="submit" class="btn btn-primary") Confirm
