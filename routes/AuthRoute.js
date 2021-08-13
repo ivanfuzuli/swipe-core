@@ -54,7 +54,7 @@ const signAndRedirect = (res, state, id, email, hasTags) => {
   const body = { sub: id, email: email };
   const token = jwt.sign(body, process.env.JWT_SECRET);
 
-  const redirectUrl = `exp://auth?state=${state}&token=${token}&hasTags=${hasTags}&where=expo-auth-session`;
+  const redirectUrl = `${process.env.REDIRECT_DEEP_LINK}://auth?state=${state}&token=${token}&hasTags=${hasTags}&where=expo-auth-session`;
   return res.redirect(302, redirectUrl);
 };
 
