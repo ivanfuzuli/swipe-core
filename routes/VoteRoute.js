@@ -1,19 +1,31 @@
 const express = require("express"),
   router = express.Router();
-const ObjectId = require("mongodb").ObjectID;
+const passport = require("passport");
+
 const Vote = require("../models/Vote");
 
-const VoteRoute = router.post("/vote", async function (req, res) {
-  const { user_id, quote_id, like } = req.body;
+const VoteRoute = router.post(
+  "/votes",
+  passport.authenticate("jwt", { session: false }),
+  async function (req, res, next) {
+    const { _id } = req.user;
+    const votes = req.body;
 
-  const vote = new Vote({
-    _user_id: ObjectId(user_id),
-    _quote_id: ObjectId(quote_id),
-    like,
-  });
+    try {
+      const votesWithUser = votes.map((vote) => {
+        return {
+          _user_id: _id,
+          _quote_id: vote.quote_id,
+          like: vote.like,
+        };
+      });
 
-  await vote.save();
-  res.send({ message: "ok" });
-});
+      await Vote.insertMany(votesWithUser);
+      res.send({ message: "success" });
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
 
 module.exports = VoteRoute;
