@@ -5,9 +5,9 @@ const passport = require("passport");
 const Vote = require("../models/Vote");
 
 const VoteRoute = router.post(
-  "/vote",
+  "/votes",
   passport.authenticate("jwt", { session: false }),
-  async function (req, res) {
+  async function (req, res, next) {
     const { _id } = req.user;
     const votes = req.body;
 
