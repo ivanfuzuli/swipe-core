@@ -172,7 +172,7 @@ router.put(
   }
 );
 
-router.put(
+router.post(
   "/delete",
   passport.authenticate("jwt", { session: false }),
   async function (req, res, next) {
