@@ -12,6 +12,12 @@ const QuoteRoute = router.get(
   passport.authenticate("jwt", { session: false }),
   async function (req, res) {
     const { _id, tags } = req.user;
+    let { limit } = req.query;
+    limit = parseInt(limit);
+
+    if (!limit || limit > 30 || limit < 1) {
+      limit = 15;
+    }
 
     const quotes = await Quotes.aggregate([
       {
@@ -59,7 +65,7 @@ const QuoteRoute = router.get(
           author: 1,
         },
       },
-      { $limit: 15 },
+      { $limit: limit },
     ]);
 
     res.send(quotes);
