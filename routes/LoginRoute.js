@@ -2,6 +2,7 @@ const express = require("express"),
   router = express.Router();
 const passport = require("passport");
 const jwt = require("jsonwebtoken");
+const Sentry = require("@sentry/node");
 
 const createError = require("http-errors");
 
@@ -24,8 +25,9 @@ const LoginRouter = router.post("/login", async (req, res, next) => {
 
         return res.json({ token, hasTags });
       });
-    } catch (error) {
-      return next(error);
+    } catch (e) {
+      Sentry.captureException(e);
+      return next(e);
     }
   })(req, res, next);
 });

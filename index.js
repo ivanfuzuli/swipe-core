@@ -1,6 +1,9 @@
 require("dotenv").config();
 const DB = process.env.DB;
 const PORT = process.env.PORT;
+const SENTRY_DSN = process.env.SENTRY_DSN;
+
+const Sentry = require("@sentry/node");
 
 const express = require("express");
 const passport = require("passport");
@@ -17,6 +20,17 @@ const ForgotRoute = require("./routes/ForgotRoute");
 const VoteRoute = require("./routes/VoteRoute");
 const QuoteRoute = require("./routes/QuoteRoute");
 const AuthRoute = require("./routes/AuthRoute");
+
+if (SENTRY_DSN) {
+  Sentry.init({
+    dsn: SENTRY_DSN,
+
+    // Set tracesSampleRate to 1.0 to capture 100%
+    // of transactions for performance monitoring.
+    // We recommend adjusting this value in production
+    tracesSampleRate: 1.0,
+  });
+}
 
 mongoose.set("useNewUrlParser", true);
 mongoose.set("useFindAndModify", false);

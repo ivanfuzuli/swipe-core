@@ -3,6 +3,9 @@ const express = require("express"),
 const passport = require("passport");
 const createError = require("http-errors");
 const User = require("../models/User");
+const Vote = require("../models/Vote");
+
+const Sentry = require("@sentry/node");
 
 router.put(
   "/email",
@@ -44,7 +47,8 @@ router.put(
           },
         }
       );
-    } catch {
+    } catch (e) {
+      Sentry.captureException(e);
       return next(createError(406, "E-mail couldn't saved! DB error."));
     }
 
@@ -80,7 +84,8 @@ router.put(
           },
         }
       );
-    } catch {
+    } catch (e) {
+      Sentry.captureException(e);
       return next(createError(406, "Username couldn't saved!"));
     }
 
@@ -125,7 +130,8 @@ router.put(
     try {
       user.password = newPassword;
       await user.save();
-    } catch {
+    } catch (e) {
+      Sentry.captureException(e);
       return next(createError(406, "Password couldn't saved!"));
     }
 
@@ -155,8 +161,45 @@ router.put(
           },
         }
       );
-    } catch (err) {
+    } catch (e) {
+      Sentry.captureException(e);
       return next(createError(406, "Unexpected db error!"));
+    }
+
+    res.send({
+      success: true,
+    });
+  }
+);
+
+router.post(
+  "/delete",
+  passport.authenticate("jwt", { session: false }),
+  async function (req, res, next) {
+    const { email } = req.user;
+    const { password } = req.body;
+
+    if (!password) {
+      return next(createError(406, "Password is required!"));
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return next(createError(406, "User not exists!"));
+    }
+
+    const validate = await user.isValidPassword(password);
+    if (!validate) {
+      return next(createError(406, "Wrong old password!"));
+    }
+
+    try {
+      await User.deleteOne({ _id: user._id });
+      await Vote.deleteMany({ _user_id: user._id });
+    } catch (e) {
+      Sentry.captureException(e);
+      return next(createError(406, "User couldn't be deleted!"));
     }
 
     res.send({

@@ -3,6 +3,7 @@ const express = require("express"),
 const passport = require("passport");
 
 const Vote = require("../models/Vote");
+const Sentry = require("@sentry/node");
 
 const VoteRoute = router.post(
   "/votes",
@@ -22,8 +23,9 @@ const VoteRoute = router.post(
 
       await Vote.insertMany(votesWithUser);
       res.send({ message: "success" });
-    } catch (err) {
-      return next(err);
+    } catch (e) {
+      Sentry.captureException(e);
+      return next(e);
     }
   }
 );
