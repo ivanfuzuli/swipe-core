@@ -4,6 +4,7 @@ const express = require("express"),
   router = express.Router();
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
+const Sentry = require("@sentry/node");
 
 const sgMail = require("@sendgrid/mail");
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
@@ -42,7 +43,8 @@ const sendMail = async (email, apiUrl) => {
 
   try {
     await sgMail.send(msg);
-  } catch (err) {
+  } catch (e) {
+    Sentry.captureException(e);
     throw err;
   }
 };
@@ -125,8 +127,8 @@ router.post("/verify/:token", async function (req, res) {
         user.password = password;
         await user.save();
       }
-    } catch (err) {
-      console.log(err);
+    } catch (e) {
+      Sentry.captureException(e);
     }
 
     message = "success";

@@ -1,9 +1,9 @@
 const express = require("express"),
   router = express.Router();
 const axios = require("axios").default;
-const url = require("url");
 const jwt = require("jsonwebtoken");
 const { nanoid } = require("nanoid");
+const Sentry = require("@sentry/node");
 
 const User = require("../models/User");
 
@@ -109,8 +109,8 @@ router.get("/facebook", async function (req, res, next) {
       email = "fb_" + nanoid().substring(0, 8) + "@swipewiseapp.com";
       return register(res, "fb_", "fb_id", state, id, email);
     }
-  } catch (err) {
-    console.log(err);
+  } catch (e) {
+    Sentry.captureException(e);
     const message = "An unexpected error occured! Please, try again later.";
     res.render("errorMessage", { title: "Error!", message });
   }
@@ -154,8 +154,8 @@ router.get("/google", async function (req, res, next) {
       email = "go_" + nanoid().substring(0, 8) + "@swipewiseapp.com";
       return register(res, "go_", "go_id", state, id, email);
     }
-  } catch (err) {
-    console.log(err);
+  } catch (e) {
+    Sentry.captureException(e);
     const message = "An unexpected error occured! Please, try again later.";
     res.render("errorMessage", { title: "Error!", message });
   }

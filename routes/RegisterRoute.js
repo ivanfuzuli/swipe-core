@@ -3,6 +3,7 @@ const express = require("express"),
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 const createError = require("http-errors");
+const Sentry = require("@sentry/node");
 
 const RegisterRoute = router.post("/register", async function (req, res, next) {
   const { email, password, username } = req.body;
@@ -33,7 +34,8 @@ const RegisterRoute = router.post("/register", async function (req, res, next) {
     const body = { sub: newUser._id, email: newUser.email };
     const token = jwt.sign(body, process.env.JWT_SECRET);
     res.status(201).json({ token, hasTags: false });
-  } catch {
+  } catch (e) {
+    Sentry.captureException(e);
     return next(
       createError(
         403,

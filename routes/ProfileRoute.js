@@ -3,6 +3,7 @@ const express = require("express"),
 const passport = require("passport");
 const createError = require("http-errors");
 const User = require("../models/User");
+const Sentry = require("@sentry/node");
 
 router.put(
   "/email",
@@ -44,7 +45,8 @@ router.put(
           },
         }
       );
-    } catch {
+    } catch (e) {
+      Sentry.captureException(e);
       return next(createError(406, "E-mail couldn't saved! DB error."));
     }
 
@@ -80,7 +82,8 @@ router.put(
           },
         }
       );
-    } catch {
+    } catch (e) {
+      Sentry.captureException(e);
       return next(createError(406, "Username couldn't saved!"));
     }
 
@@ -125,7 +128,8 @@ router.put(
     try {
       user.password = newPassword;
       await user.save();
-    } catch {
+    } catch (e) {
+      Sentry.captureException(e);
       return next(createError(406, "Password couldn't saved!"));
     }
 
@@ -155,7 +159,8 @@ router.put(
           },
         }
       );
-    } catch (err) {
+    } catch (e) {
+      Sentry.captureException(e);
       return next(createError(406, "Unexpected db error!"));
     }
 
