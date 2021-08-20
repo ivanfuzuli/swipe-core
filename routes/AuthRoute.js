@@ -194,8 +194,6 @@ router.post("/apple", async function (req, res, next) {
   try {
     const { code } = req.body;
 
-    console.log("code", code);
-
     let { sub, email } = await getCrendialsByApple(code);
 
     let foundApple = await User.findOne({ apple_id: sub });

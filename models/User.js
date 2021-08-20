@@ -10,6 +10,10 @@ const UserSchema = new mongoose.Schema(
       type: Number,
       required: false,
     },
+    apple_id: {
+      type: String,
+      required: false,
+    },
     email: {
       type: String,
       required: true,
