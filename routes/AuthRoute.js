@@ -4,6 +4,7 @@ const axios = require("axios").default;
 const jwt = require("jsonwebtoken");
 const { nanoid } = require("nanoid");
 const Sentry = require("@sentry/node");
+const createError = require("http-errors");
 
 const User = require("../models/User");
 
@@ -23,6 +24,27 @@ const getMeByFacebook = async (token) => {
   return data;
 };
 
+const getCrendialsByApple = async (authorizationCode) => {
+  const { data } = await axios.post(
+    "https://appleid.apple.com/auth/token",
+    new URLSearchParams({
+      code: authorizationCode,
+      client_id: process.env.APPLE_APP_ID,
+      client_secret: process.env.APPLE_SECRET,
+      grant_type: "authorization_code",
+      redirect_uri: process.env.APPLE_REDIRECT_URI,
+    }),
+    {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    }
+  );
+
+  const credentials = jwt.decode(data.id_token);
+
+  return credentials;
+};
 const getMeByGoogle = async (token) => {
   const { data } = await axios.get(
     `https://www.googleapis.com/oauth2/v3/userinfo?access_token=${token}`
@@ -54,8 +76,15 @@ const signAndRedirect = (res, state, id, email, hasTags) => {
   const body = { sub: id, email: email };
   const token = jwt.sign(body, process.env.JWT_SECRET);
 
-  const redirectUrl = `${process.env.REDIRECT_DEEP_LINK}://auth?state=${state}&token=${token}&hasTags=${hasTags}&where=expo-auth-session`;
-  return res.redirect(302, redirectUrl);
+  if (state !== false) {
+    const redirectUrl = `${process.env.REDIRECT_DEEP_LINK}://auth?state=${state}&token=${token}&hasTags=${hasTags}&where=expo-auth-session`;
+    return res.redirect(302, redirectUrl);
+  }
+
+  return res.send({
+    token,
+    hasTags,
+  });
 };
 
 const register = async (res, prefix, idField, state, id, email) => {
@@ -158,6 +187,53 @@ router.get("/google", async function (req, res, next) {
     Sentry.captureException(e);
     const message = "An unexpected error occured! Please, try again later.";
     res.render("errorMessage", { title: "Error!", message });
+  }
+});
+
+router.post("/apple", async function (req, res, next) {
+  try {
+    const { code } = req.body;
+
+    let { sub, email } = await getCrendialsByApple(code);
+
+    let foundApple = await User.findOne({ apple_id: sub });
+    if (foundApple) {
+      const exists = foundApple.tags.length > 0;
+
+      let hasTags = 0;
+      if (exists) {
+        hasTags = 1;
+      }
+
+      return signAndRedirect(
+        res,
+        false,
+        foundApple._id,
+        foundApple.email,
+        hasTags
+      );
+    }
+
+    // register
+
+    if (email) {
+      // apple provides email
+      let foundEmail = await User.findOne({ email });
+      if (foundEmail) {
+        const message =
+          "Your email is already in our database. You can sign-in with your e-mail and password.";
+        return next(createError(406, message));
+      }
+      return register(res, "apple_", "apple_id", false, sub, email);
+    } else {
+      email = "apple_" + nanoid().substring(0, 8) + "@swipewiseapp.com";
+      return register(res, "apple_", "apple_id", false, sub, email);
+    }
+  } catch (e) {
+    console.log("e", e);
+    Sentry.captureException(e);
+    const message = "An unexpected error occured! Please, try again later.";
+    return next(createError(406, message));
   }
 });
 module.exports = router;

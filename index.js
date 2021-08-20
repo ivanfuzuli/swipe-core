@@ -69,7 +69,7 @@ passport.use(
 passport.use("login", LoginStrategy);
 
 app.get("/", (req, res) => {
-  res.send("Hello World!");
+  res.send("Swipewise!!");
 });
 
 app.use(LoginRoute);
