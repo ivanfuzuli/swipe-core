@@ -20,6 +20,7 @@ const ForgotRoute = require("./routes/ForgotRoute");
 const VoteRoute = require("./routes/VoteRoute");
 const QuoteRoute = require("./routes/QuoteRoute");
 const AuthRoute = require("./routes/AuthRoute");
+const FeedbackRoute = require("./routes/FeedbackRoute");
 
 if (SENTRY_DSN) {
   Sentry.init({
@@ -77,6 +78,7 @@ app.use(RegisterRoute);
 app.use("/profile", ProfileRoute);
 app.use("/forgot", ForgotRoute);
 app.use("/auth", AuthRoute);
+app.use(FeedbackRoute);
 
 app.use(VoteRoute);
 app.use(QuoteRoute);
