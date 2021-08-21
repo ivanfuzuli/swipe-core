@@ -20,6 +20,7 @@ const FeedbackRoute = router.post("/feedback", async (req, res, next) => {
   const msg = {
     to: process.env.FEEDBACK_TO_MAIL, // Change to your recipient
     from: process.env.FROM, // Change to your verified sender
+    reply_to: email,
     subject: "Swipewise Feedback",
     text: `email: ${email}\n\nfeedback: \n ${feedback}`,
   };
