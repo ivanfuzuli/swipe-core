@@ -30,7 +30,7 @@ const FeedbackRoute = router.post("/feedback", async (req, res, next) => {
     return res.send({ success: true });
   } catch (e) {
     Sentry.captureException(e);
-    throw err;
+    return next(e);
   }
 });
 
