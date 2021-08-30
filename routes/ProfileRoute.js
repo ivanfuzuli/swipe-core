@@ -12,12 +12,9 @@ router.put(
   passport.authenticate("jwt", { session: false }),
   async function (req, res, next) {
     const { email } = req.user;
-    const { newEmail, password } = req.body;
+    const { newEmail } = req.body;
     if (!newEmail) {
       return next(createError(406, "New E-mail is required!"));
-    }
-    if (!password) {
-      return next(createError(406, "Password is required!"));
     }
 
     let emailExists = await User.findOne({ email: newEmail });
@@ -29,11 +26,6 @@ router.put(
 
     if (!user) {
       return next(createError(406, "User not exists!"));
-    }
-
-    const validate = await user.isValidPassword(password);
-    if (!validate) {
-      return next(createError(406, "Wrong password!"));
     }
 
     try {
@@ -100,11 +92,7 @@ router.put(
   passport.authenticate("jwt", { session: false }),
   async function (req, res, next) {
     const { email } = req.user;
-    const { oldPassword, newPassword } = req.body;
-
-    if (!oldPassword) {
-      return next(createError(406, "Old password is required!"));
-    }
+    const { newPassword } = req.body;
 
     if (!newPassword) {
       return next(createError(406, "New password is required!"));
@@ -120,11 +108,6 @@ router.put(
 
     if (!user) {
       return next(createError(406, "User not exists!"));
-    }
-
-    const validate = await user.isValidPassword(oldPassword);
-    if (!validate) {
-      return next(createError(406, "Wrong old password!"));
     }
 
     try {
