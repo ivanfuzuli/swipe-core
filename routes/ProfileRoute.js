@@ -4,7 +4,7 @@ const passport = require("passport");
 const createError = require("http-errors");
 const User = require("../models/User");
 const Vote = require("../models/Vote");
-const Claps = require("../models/Claps");
+const Clap = require("../models/Clap");
 
 const Sentry = require("@sentry/node");
 
@@ -181,7 +181,7 @@ router.post(
     try {
       await User.deleteOne({ _id: user._id });
       await Vote.deleteMany({ _user_id: user._id });
-      await Claps.deleteMany({ _user_id: user._id });
+      await Clap.deleteMany({ _user_id: user._id });
     } catch (e) {
       Sentry.captureException(e);
       return next(createError(406, "User couldn't be deleted!"));
