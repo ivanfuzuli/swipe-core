@@ -47,12 +47,16 @@ const getCrendialsByApple = async (authorizationCode) => {
   return credentials;
 };
 
-async function verifyGoogleToken(token) {
-  const client = new OAuth2Client(process.env.GOOGLE_APP_ID);
+async function verifyGoogleToken(token, platform) {
+  const clientId =
+    platform === "ios"
+      ? process.env.GOOGLE_APP_ID
+      : process.env.GOOGLE_ANDROID_APP_ID;
+  const client = new OAuth2Client(clientId);
 
   const ticket = await client.verifyIdToken({
     idToken: token,
-    audience: process.env.GOOGLE_APP_ID, // Specify the CLIENT_ID of the app that accesses the backend
+    audience: clientId, // Specify the CLIENT_ID of the app that accesses the backend
     // Or, if multiple clients access the backend:
     //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
   });
@@ -142,7 +146,9 @@ router.get("/facebook", async function (req, res, next) {
 router.post("/google", async function (req, res, next) {
   try {
     const { token } = req.body;
-    let { id, email } = await verifyGoogleToken(token);
+    const { platform } = req.params;
+
+    let { id, email } = await verifyGoogleToken(token, platform);
     let foundGoogle = await User.findOne({ go_id: id });
     if (foundGoogle) {
       const exists = foundGoogle.tags.length > 0;
