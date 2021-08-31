@@ -55,6 +55,7 @@ async function verifyGoogleToken(token, platform) {
       : process.env.GOOGLE_ANDROID_APP_ID;
   const client = new OAuth2Client(clientId);
 
+  console.log("clientid", clientid);
   const ticket = await client.verifyIdToken({
     idToken: token,
     audience: clientId, // Specify the CLIENT_ID of the app that accesses the backend
