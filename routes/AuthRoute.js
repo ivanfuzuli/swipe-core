@@ -4,6 +4,7 @@ const axios = require("axios").default;
 const jwt = require("jsonwebtoken");
 const { nanoid } = require("nanoid");
 const Sentry = require("@sentry/node");
+
 const createError = require("http-errors");
 const { OAuth2Client } = require("google-auth-library");
 
@@ -229,7 +230,6 @@ router.post("/apple", async function (req, res, next) {
       return register(res, "apple_", "apple_id", false, sub, email);
     }
   } catch (e) {
-    console.log("e", e);
     Sentry.captureException(e);
     const message = "An unexpected error occured! Please, try again later.";
     return next(createError(406, message));
