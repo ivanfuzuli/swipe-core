@@ -185,6 +185,7 @@ router.post("/google", async function (req, res, next) {
       return register(res, "go_", "go_id", state, id, email);
     }
   } catch (e) {
+    console.log("go err", e);
     Sentry.captureException(e);
     const message = "An unexpected error occured! Please, try again later.";
     next(createError(406, message));
