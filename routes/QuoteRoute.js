@@ -14,8 +14,8 @@ const QuoteRoute = router.get(
       let { limit } = req.query;
       limit = parseInt(limit);
 
-      if (!limit || limit > 30 || limit < 1) {
-        limit = 15;
+      if (!limit || limit > 50 || limit < 1) {
+        limit = 50;
       }
 
       const quotes = await Quotes.aggregate([

@@ -129,6 +129,7 @@ router.post("/verify/:token", async function (req, res) {
       }
     } catch (e) {
       Sentry.captureException(e);
+      return next(e);
     }
 
     message = "success";
