@@ -48,14 +48,10 @@ const getCrendialsByApple = async (authorizationCode) => {
   return credentials;
 };
 
-async function verifyGoogleToken(token, platform) {
-  const clientId =
-    platform === "ios"
-      ? process.env.GOOGLE_APP_ID
-      : process.env.GOOGLE_ANDROID_APP_ID;
+async function verifyGoogleToken(token) {
+  const clientId = process.env.GOOGLE_APP_ID;
   const client = new OAuth2Client(clientId);
 
-  console.log("clientid", clientId);
   const ticket = await client.verifyIdToken({
     idToken: token,
     audience: clientId, // Specify the CLIENT_ID of the app that accesses the backend
@@ -185,7 +181,6 @@ router.post("/google", async function (req, res, next) {
       return register(res, "go_", "go_id", state, id, email);
     }
   } catch (e) {
-    console.log("go err", e);
     Sentry.captureException(e);
     const message = "An unexpected error occured! Please, try again later.";
     next(createError(406, message));
