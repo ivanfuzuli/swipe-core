@@ -33,15 +33,18 @@ const ClapRoute = router.get(
 
     const getMatchGte = () => {
       let greater = null;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
       switch (filter) {
         case "day":
-          greater = subDays(new Date(), 1);
+          greater = subDays(today, 1);
           break;
         case "week":
-          greater = subDays(new Date(), 7);
+          greater = subDays(today, 7);
           break;
         case "month":
-          greater = subDays(new Date(), 30);
+          greater = subDays(today, 30);
           break;
         default:
           greater = null;
