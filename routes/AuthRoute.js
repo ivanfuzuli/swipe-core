@@ -4,7 +4,9 @@ const axios = require("axios").default;
 const jwt = require("jsonwebtoken");
 const { nanoid } = require("nanoid");
 const Sentry = require("@sentry/node");
+
 const createError = require("http-errors");
+const { OAuth2Client } = require("google-auth-library");
 
 const User = require("../models/User");
 
@@ -45,32 +47,26 @@ const getCrendialsByApple = async (authorizationCode) => {
 
   return credentials;
 };
-const getMeByGoogle = async (token) => {
-  const { data } = await axios.get(
-    `https://www.googleapis.com/oauth2/v3/userinfo?access_token=${token}`
-  );
+
+async function verifyGoogleToken(token) {
+  const clientId = process.env.GOOGLE_APP_ID;
+  const client = new OAuth2Client(clientId);
+
+  const ticket = await client.verifyIdToken({
+    idToken: token,
+    audience: clientId, // Specify the CLIENT_ID of the app that accesses the backend
+    // Or, if multiple clients access the backend:
+    //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
+  });
+  const payload = ticket.getPayload();
+  const id = payload["sub"];
+  const email = payload["email"];
 
   return {
-    id: data.sub,
-    email: data.email,
+    id,
+    email,
   };
-};
-
-const getTokenByGoogle = async (req, code) => {
-  const orgRedirectUri = process.env.API_URL + "/auth/google";
-  const reqUrl = `https://oauth2.googleapis.com/token`;
-  const payload = {
-    code,
-    client_id: process.env.GOOGLE_APP_ID,
-    client_secret: process.env.GOOGLE_SECRET,
-    redirect_uri: orgRedirectUri,
-    grant_type: "authorization_code",
-  };
-
-  const { data } = await axios.post(reqUrl, payload);
-
-  return data.access_token;
-};
+}
 
 const signAndRedirect = (res, state, id, email, hasTags) => {
   const body = { sub: id, email: email };
@@ -145,11 +141,12 @@ router.get("/facebook", async function (req, res, next) {
   }
 });
 
-router.get("/google", async function (req, res, next) {
+router.post("/google", async function (req, res, next) {
   try {
-    const { state, code } = req.query;
-    let { id, email } = await getMeByGoogle(await getTokenByGoogle(req, code));
+    const { token } = req.body;
+    const { platform } = req.params;
 
+    let { id, email } = await verifyGoogleToken(token, platform);
     let foundGoogle = await User.findOne({ go_id: id });
     if (foundGoogle) {
       const exists = foundGoogle.tags.length > 0;
@@ -161,7 +158,7 @@ router.get("/google", async function (req, res, next) {
 
       return signAndRedirect(
         res,
-        state,
+        false,
         foundGoogle._id,
         foundGoogle.email,
         hasTags
@@ -186,7 +183,7 @@ router.get("/google", async function (req, res, next) {
   } catch (e) {
     Sentry.captureException(e);
     const message = "An unexpected error occured! Please, try again later.";
-    res.render("errorMessage", { title: "Error!", message });
+    next(createError(406, message));
   }
 });
 
@@ -230,7 +227,6 @@ router.post("/apple", async function (req, res, next) {
       return register(res, "apple_", "apple_id", false, sub, email);
     }
   } catch (e) {
-    console.log("e", e);
     Sentry.captureException(e);
     const message = "An unexpected error occured! Please, try again later.";
     return next(createError(406, message));
