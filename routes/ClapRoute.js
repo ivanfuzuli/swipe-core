@@ -34,7 +34,6 @@ const ClapRoute = router.get(
     const getMatchGte = () => {
       let greater = null;
       const today = new Date();
-      today.setHours(0, 0, 0, 0);
 
       switch (filter) {
         case "day":
