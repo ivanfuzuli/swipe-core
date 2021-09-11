@@ -175,10 +175,10 @@ router.post("/google", async function (req, res, next) {
           "Your email is already in our database. You can sign-in with your e-mail and password.";
         return res.render("errorMessage", { title: "Error!", message });
       }
-      return register(res, "go_", "go_id", state, id, email);
+      return register(res, "go_", "go_id", false, id, email);
     } else {
       email = "go_" + nanoid().substring(0, 8) + "@swipewiseapp.com";
-      return register(res, "go_", "go_id", state, id, email);
+      return register(res, "go_", "go_id", false, id, email);
     }
   } catch (e) {
     Sentry.captureException(e);
