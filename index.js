@@ -31,6 +31,7 @@ if (SENTRY_DSN) {
     // of transactions for performance monitoring.
     // We recommend adjusting this value in production
     tracesSampleRate: 1.0,
+    environment: process.env.ENVIRONMENT,
   });
 }
 
