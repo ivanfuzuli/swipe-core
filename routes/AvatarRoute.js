@@ -14,6 +14,8 @@ const AvatarRoute = router.get("/avatar/:seed", async (req, res, next) => {
       // ... and other options
     });
 
+    svg = svg.replace(/undefined/g, "");
+
     req.header("Content-Type", "image/svg+xml");
     res.send(svg);
   } catch (e) {
