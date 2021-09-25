@@ -6,13 +6,23 @@ const createError = require("http-errors");
 const Clap = require("../models/Clap");
 const Sentry = require("@sentry/node");
 
+const ObjectID = require("mongodb").ObjectID;
+
 const ClapRoute = router.get(
   "/claps",
   passport.authenticate("jwt", { session: false }),
   async (req, res, next) => {
-    let { limit = 15, offset = 0, filter = null, sort = "newest" } = req.query;
     const { _id } = req.user;
 
+    let {
+      limit = 15,
+      offset = 0,
+      filter = null,
+      sort = "newest",
+      sub,
+    } = req.query;
+
+    const id = sub ? ObjectID(sub) : _id;
     limit = parseInt(limit);
     offset = parseInt(offset);
 
@@ -69,7 +79,7 @@ const ClapRoute = router.get(
       const quotes = await Clap.aggregate([
         {
           $match: {
-            _user_id: _id,
+            _user_id: id,
             ...getMatchGte(),
           },
         },
