@@ -20,7 +20,6 @@ const MeRoute = router.get(
         return next(createError(406, "User not exists!"));
       }
 
-      console.log("burada");
       res.send(user);
     } catch (e) {
       console.log("ee", e);

@@ -3,8 +3,9 @@ const express = require("express"),
 const passport = require("passport");
 
 const Vote = require("../models/Vote");
-const Clap = require("../models/Clap");
+const Quote = require("../models/Quotes");
 
+const Clap = require("../models/Clap");
 const Sentry = require("@sentry/node");
 
 const VoteRoute = router.post(
@@ -47,6 +48,23 @@ const VoteRoute = router.post(
         );
       }
       await Vote.insertMany(votesWithUser);
+
+      for (const vote of votes) {
+        await Quote.updateOne(
+          { _id: vote.quote_id },
+          {
+            $push: {
+              liked_by: {
+                $each: [_id],
+                $slice: -3,
+              },
+            },
+            $inc: {
+              liked_by_count: 1,
+            },
+          }
+        );
+      }
       res.send({ message: "success" });
     } catch (e) {
       Sentry.captureException(e);
