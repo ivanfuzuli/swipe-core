@@ -27,6 +27,15 @@ router.get(
         },
         { $project: { "user._id": 1, "user.username": 1 } },
         { $unwind: "$user" },
+        {
+          $sort: {
+            _id: -1,
+          },
+        },
+
+        {
+          $limit: 100,
+        },
       ]);
       res.send(result);
     } catch (e) {
