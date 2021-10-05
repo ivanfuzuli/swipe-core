@@ -49,7 +49,7 @@ const VoteRoute = router.post(
       }
       await Vote.insertMany(votesWithUser);
 
-      for (const vote of votes) {
+      for (const vote of votesWithUser) {
         await Quote.updateOne(
           { _id: vote.quote_id },
           {

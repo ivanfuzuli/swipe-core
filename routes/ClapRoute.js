@@ -75,7 +75,7 @@ const ClapRoute = router.get(
       const total = await Clap.find({
         _user_id: id,
         ...getMatchGte(),
-      }).count();
+      }).countDocuments();
       const quotes = await Clap.aggregate([
         {
           $match: {
