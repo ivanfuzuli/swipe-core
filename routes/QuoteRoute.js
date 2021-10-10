@@ -3,9 +3,49 @@ const express = require("express"),
 const passport = require("passport");
 
 const Quotes = require("../models/Quotes");
-const Sentry = require("@sentry/node");
+const Vote = require("../models/Vote");
 
-const QuoteRoute = router.get(
+const Sentry = require("@sentry/node");
+const ObjectID = require("mongodb").ObjectID;
+
+router.get(
+  "/quotes/:id",
+  passport.authenticate("jwt", { session: false }),
+  async function (req, res, next) {
+    const { id } = req.params;
+
+    try {
+      const result = await Vote.aggregate([
+        { $match: { _quote_id: ObjectID(id) } },
+        {
+          $lookup: {
+            from: "users",
+            localField: "_user_id",
+            foreignField: "_id",
+            as: "user",
+          },
+        },
+        { $project: { "user._id": 1, "user.username": 1 } },
+        { $unwind: "$user" },
+        {
+          $sort: {
+            _id: -1,
+          },
+        },
+
+        {
+          $limit: 100,
+        },
+      ]);
+      res.send(result);
+    } catch (e) {
+      Sentry.captureException(e);
+      next(e);
+    }
+  }
+);
+
+router.get(
   "/quotes",
   passport.authenticate("jwt", { session: false }),
   async function (req, res, next) {
@@ -62,6 +102,8 @@ const QuoteRoute = router.get(
             quote: 1,
             title: 1,
             author: 1,
+            liked_by: 1,
+            liked_by_count: 1,
           },
         },
         { $limit: limit },
@@ -75,4 +117,4 @@ const QuoteRoute = router.get(
   }
 );
 
-module.exports = QuoteRoute;
+module.exports = router;
